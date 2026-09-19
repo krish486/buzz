@@ -97,11 +97,11 @@ const BuzzScreen = ({
                             }
 
                             {status === "correct" &&
-                                "Correct answer • +5 points"
+                                "Correct answer • +3 points"
                             }
 
                             {status === "incorrect" &&
-                                "Incorrect answer • −5 points"
+                                "Incorrect answer • −2 points"
                             }
 
                         </span>

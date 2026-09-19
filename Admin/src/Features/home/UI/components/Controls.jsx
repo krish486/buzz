@@ -88,7 +88,7 @@ const Controls = ({
                         </strong>
 
                         <small className="text-[9px] tracking-widest text-zinc-500">
-                            +5 POINTS
+                            +3 POINTS
                         </small>
 
                     </div>
@@ -141,7 +141,7 @@ const Controls = ({
                         </strong>
 
                         <small className="text-[9px] tracking-widest text-zinc-500">
-                            −5 POINTS
+                            −2 POINTS
                         </small>
 
                     </div>

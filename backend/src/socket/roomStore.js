@@ -127,19 +127,31 @@ async function registerBuzz(roomId, teamId) {
 
 async function scoreBuzzedTeam(roomId, result) {
     const normalizedRoomId = normalizeRoomId(roomId);
+
     const status = result === "correct" ? "correct" : "incorrect";
-    const scoreChange = status === "correct" ? 5 : -5;
-    const rooms = getDatabase().collection("rooms");
-    const room = await rooms.findOneAndUpdate(
-        { _id: normalizedRoomId, status: "buzzed", buzzedTeamId: { $ne: null } },
+    const scoreChange = status === "correct" ? 3 : -2;
+
+    const db = getDatabase();
+    const rooms = db.collection("rooms");
+
+    const roomResult = await rooms.findOneAndUpdate(
+        {
+            _id: normalizedRoomId,
+            status: "buzzed",
+            buzzedTeamId: { $ne: null },
+        },
         {
             $set: {
                 status,
                 updatedAt: new Date(),
             },
         },
-        { returnDocument: "after" }
+        {
+            returnDocument: "after",
+        }
     );
+
+    const room = roomResult?.value ?? roomResult;
 
     if (!room) {
         return {
@@ -148,16 +160,19 @@ async function scoreBuzzedTeam(roomId, result) {
         };
     }
 
-    await getDatabase().collection("teams").updateOne(
-        { _id: room.buzzedTeamId, roomId: normalizedRoomId },
-        [
-            {
-                $set: {
-                    score: { $max: [0, { $add: ["$score", scoreChange] }] },
-                    updatedAt: new Date(),
-                },
+    await db.collection("teams").updateOne(
+        {
+            _id: room.buzzedTeamId,
+            roomId: normalizedRoomId,
+        },
+        {
+            $inc: {
+                score: scoreChange,
             },
-        ]
+            $set: {
+                updatedAt: new Date(),
+            },
+        }
     );
 
     return {
@@ -165,7 +180,6 @@ async function scoreBuzzedTeam(roomId, result) {
         state: await getRoomState(normalizedRoomId),
     };
 }
-
 async function clearBuzz(roomId) {
     const normalizedRoomId = normalizeRoomId(roomId);
 
